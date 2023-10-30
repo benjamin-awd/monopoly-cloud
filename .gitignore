@@ -1,0 +1,25 @@
+*.pdf
+*.ipynb
+*.csv
+.python-version
+Brewfile.lock.json
+__pycache__
+.terraform
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+credentials.json
+token.json
+_ignore*
+*.tfvars
+*.txt
+
+# allowed pdf files/fixtures
+!tests/integration/banks/**/*.csv
+!tests/integration/banks/**/*.pdf
+!monopoly/examples/*.pdf
+
+# john files
+john.log
+.hash
+.pot

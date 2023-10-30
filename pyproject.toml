@@ -1,0 +1,82 @@
+[tool.poetry]
+name = "monocloud"
+version = "0.1.0"
+description = ""
+authors = ["benjamin-awd <benjamindornel@gmail.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+monopoly-sg = "^0.1.2"
+google-api-python-client = "^2.98.0"
+google-auth-oauthlib = "^1.0.0"
+google-auth = "^2.22.0"
+google-cloud-storage = "^2.10.0"
+google-cloud-secret-manager = "^2.16.3"
+
+[tool.poetry.group.dev.dependencies]
+black = "^23.7.0"
+pylint = "^2.17.5"
+isort = "^5.12.0"
+taskipy = "^1.12.0"
+flake8 = "^6.1.0"
+pytest = "^7.4.1"
+pytest-xdist = "^3.3.1"
+pysnooper = "^1.2.0"
+google-api-python-client-stubs = "^1.17.0"
+pylint-pydantic = "^0.3.0"
+mypy = "^1.6.1"
+
+
+[tool.taskipy.tasks]
+format = "isort . && black ."
+lint = "flake8 monopoly && pylint monopoly"
+full_test = "pytest -n auto"
+mypy = "mypy monopoly"
+ci = "poetry run task format && poetry run task lint && poetry run task test"
+
+[tool.pylint]
+good-names = ["i", "j", "k", "ex", "Run", "_", "df"]
+disable = [
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "missing-class-docstring",
+    "logging-fstring-interpolation",
+    "no-member"
+]
+ignore-paths = ["tests"]
+load-plugins = "pylint_pydantic"
+
+[tool.black]
+line-length = 88
+
+[tool.isort]
+profile = "black"
+
+[tool.pytest.ini_options]
+filterwarnings = [
+    "ignore:Deprecated call to `pkg_resources\\.declare_namespace\\('.*'\\):DeprecationWarning",
+    "ignore::DeprecationWarning:google.rpc",
+]
+
+[tool.mypy]
+disable_error_code = [
+    "annotation-unchecked",
+]
+exclude = [
+    "gmail\\.py"
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "fitz",
+    "pdftotext",
+    "pdf2john",
+    "pandas",
+    "google.cloud",
+    "google.oauth2.credentials"
+]
+ignore_missing_imports = true
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
