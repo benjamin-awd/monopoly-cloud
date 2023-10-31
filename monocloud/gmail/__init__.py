@@ -1,1 +1,3 @@
-from .gmail import Gmail, Message, MessageAttachment, MessagePart  # noqa: F401
+from .gmail import Gmail, Message, MessageAttachment, MessagePart
+
+__all__ = ["Gmail", "Message", "MessageAttachment", "MessagePart"]

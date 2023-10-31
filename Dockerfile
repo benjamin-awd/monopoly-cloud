@@ -16,6 +16,9 @@ COPY pyproject.toml poetry.lock ./
 
 FROM base AS builder
 
+RUN apt-get update \
+  && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM base AS test
@@ -30,7 +33,7 @@ COPY --from=brew /home/linuxbrew/.linuxbrew/bin/john /home/linuxbrew/.linuxbrew/
 COPY --from=brew /home/linuxbrew/.linuxbrew/lib /home/linuxbrew/.linuxbrew/lib
 ENV PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH
 
-COPY monopoly ./monopoly
+COPY monocloud ./monocloud
 COPY tests ./tests
 RUN poetry install
 
@@ -48,9 +51,6 @@ COPY --from=brew /home/linuxbrew/.linuxbrew/bin/john /home/linuxbrew/.linuxbrew/
 COPY --from=brew /home/linuxbrew/.linuxbrew/lib /home/linuxbrew/.linuxbrew/lib
 ENV PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH
 
-RUN apt-get update \
-  && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+COPY monocloud ./monocloud
 
-COPY monopoly ./monopoly
-
-CMD ["python", "-m", "monopoly.main"]
+CMD ["python", "-m", "monocloud.main"]

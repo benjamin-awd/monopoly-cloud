@@ -7,7 +7,7 @@ import sys
 from base64 import urlsafe_b64decode
 from dataclasses import dataclass
 from tempfile import TemporaryDirectory
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Generator, Optional
 
 from monocloud.config import cloud_settings
 from monocloud.gmail.credentials import get_gmail_service
@@ -24,12 +24,12 @@ logger = logging.getLogger(__name__)
 
 
 class Gmail:
-    def __init__(self, gmail_service: GmailResource = None):
+    def __init__(self, gmail_service: Optional[GmailResource] = None):
         if not gmail_service:
             self.gmail_service = get_gmail_service()
 
     def get_emails(self, query="is:unread", latest=False) -> list[Message]:
-        emails: list = (
+        emails = (
             self.gmail_service.users()
             .messages()
             .list(userId="me", q=query)
@@ -55,9 +55,11 @@ class Gmail:
             )
             messages.append(message)
 
-        return [Message(message, self.gmail_service) for message in messages]
+        return [
+            Message(message, self.gmail_service) for message in messages  # type: ignore
+        ]
 
-    def get_attachment_byte_string(self, message_id, attachment_id) -> dict:
+    def get_attachment_byte_string(self, message_id, attachment_id) -> bytes:
         logger.debug("Extracting attachment byte string")
         attachment = (
             self.gmail_service.users()
@@ -72,8 +74,8 @@ class Gmail:
 
 class Message(Gmail):
     def __init__(self, data: dict, gmail_service: GmailResource):
-        self.message_id: str | None = data.get("id")
-        self.payload: dict | None = data.get("payload")
+        self.message_id: str = data.get("id")  # type: ignore
+        self.payload: dict = data.get("payload")  # type: ignore
         self.gmail_service = gmail_service
         self.trusted_user_emails = cloud_settings.trusted_user_emails
         super().__init__(gmail_service)
@@ -90,9 +92,9 @@ class Message(Gmail):
         )
         return MessageAttachment(attachment_part.filename, file_byte_string)
 
-    @staticmethod
+    @staticmethod  # type: ignore
     @contextlib.contextmanager
-    def save(attachment: MessageAttachment) -> TemporaryDirectory:
+    def save(attachment: MessageAttachment) -> Generator:
         """Saves attachment to a temporary directory"""
         temp_dir = TemporaryDirectory()
         temp_file_path = os.path.join(temp_dir.name, attachment.filename)
@@ -135,13 +137,13 @@ class Message(Gmail):
 
     @property
     def subject(self) -> str:
-        for item in self.payload.get("headers"):
+        for item in self.payload["headers"]:
             if item["name"] == "Subject":
                 return item["value"]
         raise RuntimeError("Subject could not be found")
 
     @property
-    def parts(self) -> list[MessagePart]:
+    def parts(self) -> list[MessagePart] | None:
         """Return parts and nested parts"""
         if parts := self.payload.get("parts"):
             nested_parts = [
@@ -171,9 +173,9 @@ class Message(Gmail):
 class MessagePart:
     def __init__(self, data: dict):
         self._data = data
-        self.part_id: str = data.get("partId")
-        self.filename: str = data.get("filename")
-        self.body: dict = data.get("body")
+        self.part_id: str | None = data.get("partId")
+        self.filename: str | None = data.get("filename")
+        self.body: dict | None = data.get("body")
 
     @property
     def attachment_id(self):
