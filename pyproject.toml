@@ -29,9 +29,9 @@ mypy = "^1.6.1"
 
 [tool.taskipy.tasks]
 format = "isort . && black ."
-lint = "flake8 monopoly && pylint monopoly"
+lint = "flake8 monocloud && pylint monocloud"
 full_test = "pytest -n auto"
-mypy = "mypy monopoly"
+mypy = "mypy monocloud"
 ci = "poetry run task format && poetry run task lint && poetry run task test"
 
 [tool.pylint]
