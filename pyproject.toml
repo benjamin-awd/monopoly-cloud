@@ -72,8 +72,9 @@ module = [
     "pdftotext",
     "pdf2john",
     "pandas",
-    "google.cloud",
-    "google.oauth2.credentials"
+    "monopoly.*",
+    "google.*",
+    "google_auth_oauthlib.flow",
 ]
 ignore_missing_imports = true
 
