@@ -4,7 +4,7 @@ from typing import Optional
 
 from google.cloud import storage  # type: ignore
 from monopoly.statement import Statement
-from monopoly.storage import generate_name, write_to_csv
+from monopoly.write import generate_name, write_to_csv
 from pandas import DataFrame
 
 from monocloud.config import cloud_settings
@@ -22,7 +22,7 @@ def upload_to_cloud_storage(
     client = storage.Client()
     bucket = client.get_bucket(bucket_name)
 
-    blob_name = generate_name("blob", statement.config, statement.statement_date)
+    blob_name = generate_name("blob", statement.statement_config, statement.statement_date)
     blob = bucket.blob(blob_name)
 
     logger.info(f"Attempting to upload to 'gs://{bucket_name}/{blob_name}'")
@@ -35,7 +35,7 @@ def load(
     statement: Statement,
     csv_file_path: Optional[str] = None,
 ):
-    filename = generate_name("file", statement.config, statement.statement_date)
+    filename = generate_name("file", statement.statement_config, statement.statement_date)
     csv_file_path = os.path.join(ROOT_DIR, "output", filename)
     logger.info("Writing CSV to file path: %s", csv_file_path)
 

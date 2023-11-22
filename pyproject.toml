@@ -5,8 +5,8 @@ description = ""
 authors = ["benjamin-awd <benjamindornel@gmail.com>"]
 
 [tool.poetry.dependencies]
-python = "^3.11"
-monopoly-sg = "^0.1.2"
+python = ">=3.11,<3.12"
+monopoly-sg = "^0.3.0"
 google-api-python-client = "^2.98.0"
 google-auth-oauthlib = "^1.0.0"
 google-auth = "^2.22.0"
