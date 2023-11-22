@@ -1,9 +1,9 @@
 version: "3.8"
 services:
-  monocloud:
+  monopoly:
     build: .
-    container_name: monocloud
-    image: monocloud
+    container_name: monopoly
+    image: monopoly
     volumes:
       - $HOME/.config/gcloud:/root/.config/gcloud
       - ./monocloud:/monocloud

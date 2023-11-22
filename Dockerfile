@@ -51,6 +51,9 @@ COPY --from=brew /home/linuxbrew/.linuxbrew/bin/john /home/linuxbrew/.linuxbrew/
 COPY --from=brew /home/linuxbrew/.linuxbrew/lib /home/linuxbrew/.linuxbrew/lib
 ENV PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH
 
+RUN apt-get update \
+  && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+
 COPY monocloud ./monocloud
 
 CMD ["python", "-m", "monocloud.main"]
