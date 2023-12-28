@@ -1,15 +1,10 @@
 import logging
-import os
-from typing import Optional
+from pathlib import Path
 
 from google.cloud import storage  # type: ignore
-from monopoly.statement import Statement
-from monopoly.write import generate_name, write_to_csv
+from monopoly.statements import CreditStatement, DebitStatement
+from monopoly.write import generate_name
 from pandas import DataFrame
-
-from monocloud.config import cloud_settings
-
-ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 logger = logging.getLogger(__name__)
 
@@ -17,12 +12,17 @@ logger = logging.getLogger(__name__)
 def upload_to_cloud_storage(
     source_filename: str,
     bucket_name: str,
-    statement: Statement,
+    statement: CreditStatement | DebitStatement,
 ) -> None:
     client = storage.Client()
     bucket = client.get_bucket(bucket_name)
-
-    blob_name = generate_name("blob", statement.statement_config, statement.statement_date)
+    blob_name = generate_name(
+        file_path=source_filename,
+        format_type="blob",
+        statement_config=statement.statement_config,
+        statement_type=statement.statement_type,
+        statement_date=statement.statement_date,
+    )
     blob = bucket.blob(blob_name)
 
     logger.info(f"Attempting to upload to 'gs://{bucket_name}/{blob_name}'")
@@ -32,17 +32,22 @@ def upload_to_cloud_storage(
 
 def load(
     df: DataFrame,
-    statement: Statement,
-    csv_file_path: Optional[str] = None,
+    statement: CreditStatement | DebitStatement,
+    output_directory: Path,
+    file_path: Path,
 ):
-    filename = generate_name("file", statement.statement_config, statement.statement_date)
-    csv_file_path = os.path.join(ROOT_DIR, "output", filename)
-    logger.info("Writing CSV to file path: %s", csv_file_path)
+    if isinstance(output_directory, str):
+        output_directory = Path(output_directory)
 
-    csv_file_path = write_to_csv(df, csv_file_path=csv_file_path, statement=statement)
-
-    upload_to_cloud_storage(
-        statement=statement,
-        source_filename=csv_file_path,  # type: ignore
-        bucket_name=cloud_settings.gcs_bucket,
+    filename = generate_name(
+        file_path=file_path,
+        format_type="file",
+        statement_config=statement.statement_config,
+        statement_type=statement.statement_type,
+        statement_date=statement.statement_date,
     )
+    output_path = output_directory / filename
+    logger.debug("Writing CSV to file path: %s", output_path)
+    df.to_csv(output_path, index=False)
+
+    return output_path

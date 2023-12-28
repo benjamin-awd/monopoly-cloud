@@ -72,12 +72,12 @@ resource "google_cloud_run_v2_job" "default" {
           value = jsonencode(var.trusted_emails)
         }
         env {
-          name  = "OCBC_PDF_PASSWORD"
-          value = var.ocbc_password
+          name  = "OCBC_PDF_PASSWORDS"
+          value = jsonencode(var.ocbc_passwords)
         }
         env {
-          name  = "HSBC_PDF_PASSWORD_PREFIX"
-          value = var.hsbc_password_prefix
+          name  = "HSBC_PDF_PASSWORDS"
+          value = jsonencode(var.hsbc_passwords)
         }
       }
     }
