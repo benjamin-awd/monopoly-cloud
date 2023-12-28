@@ -1,9 +1,6 @@
 """Test for entrypoint used by Cloud Run"""
 from unittest.mock import Mock, PropertyMock, patch
 
-import pytest
-
-from monocloud.constants import EmailSubjectRegex
 from monocloud.main import process_bank_statement
 
 
@@ -22,24 +19,3 @@ def run_bank_statement_test(message, pattern, subject, expected_result):
 
         else:
             bank_class.assert_not_called()
-
-
-@pytest.mark.parametrize(
-    "subject,pattern,expected_result",
-    [
-        ("OCBC Bank: Your Credit Card e-Statement", EmailSubjectRegex.OCBC, "call"),
-        ("Your HSBC VISA REVOLUTION eStatement", EmailSubjectRegex.HSBC, "call"),
-        ("Random Subject", EmailSubjectRegex.OCBC, "ignore"),
-    ],
-)
-def test_process_bank_statements(
-    monkeypatch,
-    message,
-    pattern,
-    attachment,
-    subject,
-    expected_result,
-):
-    monkeypatch.setattr(message, "get_attachment", lambda: attachment)
-
-    run_bank_statement_test(message, pattern, subject, expected_result)

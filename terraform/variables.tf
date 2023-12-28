@@ -1,12 +1,12 @@
-variable "ocbc_password" {
-  description = "Password for encrypted OCBC PDFs"
-  type        = string
+variable "ocbc_passwords" {
+  description = "Passwords for encrypted OCBC PDFs"
+  type        = list(string)
   sensitive   = true
 }
 
-variable "hsbc_password_prefix" {
-  description = "Prefix of password for encrypted HSBC PDFs"
-  type        = string
+variable "hsbc_passwords" {
+  description = "Passwords for encrypted HSBC PDFs"
+  type        = list(string)
   sensitive   = true
 }
 
@@ -18,7 +18,7 @@ variable "gmail_address" {
 
 variable "trusted_emails" {
   description = "Trusted user emails"
-  type        = list(any)
+  type        = list(string)
   sensitive   = true
 }
 

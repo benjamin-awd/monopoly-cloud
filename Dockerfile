@@ -1,6 +1,3 @@
-FROM homebrew/brew:4.1.14 AS brew
-RUN brew install john-jumbo
-
 FROM python:3.11.4-slim AS base
 
 RUN pip install poetry==1.6.1
@@ -28,11 +25,6 @@ RUN apt-get update \
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
-COPY --from=brew /home/linuxbrew/.linuxbrew/Cellar /home/linuxbrew/.linuxbrew/Cellar
-COPY --from=brew /home/linuxbrew/.linuxbrew/bin/john /home/linuxbrew/.linuxbrew/bin/john
-COPY --from=brew /home/linuxbrew/.linuxbrew/lib /home/linuxbrew/.linuxbrew/lib
-ENV PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH
-
 COPY monocloud ./monocloud
 COPY tests ./tests
 RUN poetry install
@@ -46,14 +38,9 @@ ENV VIRTUAL_ENV=/app/.venv \
     PYTHONUNBUFFERED=1
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
-COPY --from=brew /home/linuxbrew/.linuxbrew/Cellar /home/linuxbrew/.linuxbrew/Cellar
-COPY --from=brew /home/linuxbrew/.linuxbrew/bin/john /home/linuxbrew/.linuxbrew/bin/john
-COPY --from=brew /home/linuxbrew/.linuxbrew/lib /home/linuxbrew/.linuxbrew/lib
-ENV PATH=/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin:$PATH
 
 RUN apt-get update \
   && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
-
 COPY monocloud ./monocloud
 
 CMD ["python", "-m", "monocloud.main"]

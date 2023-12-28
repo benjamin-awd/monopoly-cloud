@@ -6,6 +6,6 @@ services:
     image: monopoly
     volumes:
       - $HOME/.config/gcloud:/root/.config/gcloud
-      - ./monocloud:/monocloud
+      - ./monocloud:/app/monocloud
     env_file:
       .env
