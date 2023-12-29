@@ -1,11 +1,13 @@
 # pylint: disable=broad-exception-caught
 import logging
+import sys
 from pathlib import Path
 
 from monopoly.processors import detect_processor
 
 from monocloud.config import cloud_settings
 from monocloud.gmail import Gmail, Message
+from monocloud.gmail.exceptions import AttachmentNotFoundError
 from monocloud.storage import load, upload_to_cloud_storage
 
 logger = logging.getLogger(__name__)
@@ -17,14 +19,21 @@ def main():
     transforms it, then loads it to disk or cloud
     """
     logger.info("Beginning bank statement extraction")
-
     messages: list[Message] = Gmail().get_emails()
+    unhandled_exceptions = False
+
     for message in messages:
         try:
             process_bank_statement(message)
-        except Exception as err:
+        except AttachmentNotFoundError as err:
             logger.error(err, exc_info=True)
             message.mark_as_spam()
+        except Exception as err:
+            unhandled_exceptions = True
+            logger.error(err, exc_info=True)
+
+    if unhandled_exceptions:
+        sys.exit(1)
 
 
 def process_bank_statement(message: Message, upload_to_cloud: bool = True):
