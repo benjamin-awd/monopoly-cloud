@@ -122,6 +122,15 @@ class Message(Gmail):
             .execute()
         )
 
+    def mark_as_spam(self):
+        logger.info("Marking email %s as spam", self.message_id)
+        return (
+            self.gmail_service.users()
+            .messages()
+            .modify(userId="me", id=self.message_id, body={"addLabelIds": ["SPAM"]})
+            .execute()
+        )
+
     def _get_attachment_part(self) -> MessagePart:
         if not self.parts:
             raise AttachmentNotFoundError

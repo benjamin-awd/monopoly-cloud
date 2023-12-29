@@ -23,7 +23,8 @@ def main():
         try:
             process_bank_statement(message)
         except Exception as err:
-            logger.error(err)
+            logger.error(err, exc_info=True)
+            message.mark_as_spam()
 
 
 def process_bank_statement(message: Message, upload_to_cloud: bool = True):
@@ -52,7 +53,7 @@ def process_bank_statement(message: Message, upload_to_cloud: bool = True):
                 )
                 message.mark_as_read()
             except Exception as err:
-                logger.error(err)
+                logger.error(err, exc_info=True)
 
 
 if __name__ == "__main__":
