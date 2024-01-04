@@ -3,5 +3,10 @@ data "google_secret_manager_secret_version" "default" {
   project = var.project_id
 }
 
+data "google_secret_manager_secret_version" "dbs" {
+  secret  = "dbs-otp-email-token"
+  project = var.project_id
+}
+
 data "google_project" "project" {
 }
