@@ -9,6 +9,12 @@ resource "google_artifact_registry_repository" "default" {
   format        = "DOCKER"
 }
 
+resource "google_artifact_registry_repository" "dbs" {
+  location      = var.region
+  repository_id = "dbs"
+  format        = "DOCKER"
+}
+
 resource "google_secret_manager_secret_iam_binding" "default" {
   secret_id = data.google_secret_manager_secret_version.default.secret
   project   = data.google_secret_manager_secret_version.default.project
@@ -35,7 +41,7 @@ resource "google_cloud_run_v2_job" "default" {
       max_retries     = 1
 
       containers {
-        image = local.container_uri
+        image = "${local.container_uri_prefix}/monopoly/monopoly:main"
 
         env {
           name  = "PUBSUB_TOPIC"

@@ -36,3 +36,30 @@ variable "gmail_credential_secret" {
   description = "Name of secret containing client secret and token for Gmail account"
   type        = string
 }
+
+variable "dbs_user_id" {
+  description = "DBS user id"
+  type = string
+  sensitive = true
+}
+
+variable "dbs_pin" {
+  description = "DBS PIN"
+  type = string
+  sensitive = true
+}
+
+variable "dbs_gmail_credential_secret" {
+  description = "Name of secret containing client secret and token for DBS Gmail account"
+  type        = string
+}
+
+variable "dbs_from_email" {
+  type      = string
+  sensitive = true
+}
+
+variable "dbs_to_email" {
+  type      = string
+  sensitive = true
+}
