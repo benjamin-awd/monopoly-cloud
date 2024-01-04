@@ -7,10 +7,29 @@ resource "random_id" "bucket_prefix" {
   byte_length = 8
 }
 
-resource "google_storage_bucket" "default" {
+resource "google_storage_bucket" "transactions" {
   name          = "monopoly-${random_id.bucket_prefix.hex}"
   location      = "US"
   storage_class = "STANDARD"
+
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.terraform_state_bucket.id
+  }
+
+  depends_on = [google_project_iam_member.kms]
+}
+
+resource "google_storage_bucket" "terraform" {
+  name          = "tfstate-${random_id.bucket_prefix.hex}"
+  force_destroy = false
+  location      = "US"
+  storage_class = "STANDARD"
+
+  encryption {
+    default_kms_key_name = google_kms_crypto_key.terraform_state_bucket.id
+  }
+
+  depends_on = [google_project_iam_member.kms]
 }
 
 resource "google_artifact_registry_repository" "default" {
@@ -29,8 +48,8 @@ resource "google_secret_manager_secret_iam_binding" "default" {
   ]
 }
 
-resource "google_storage_bucket_iam_member" "default" {
-  bucket = google_storage_bucket.default.name
+resource "google_storage_bucket_iam_member" "storage" {
+  bucket = google_storage_bucket.transactions.name
   role   = "roles/storage.admin"
   member = "serviceAccount:${google_service_account.default.email}"
 }
@@ -61,7 +80,7 @@ resource "google_cloud_run_v2_job" "default" {
         }
         env {
           name  = "GCS_BUCKET"
-          value = google_storage_bucket.default.name
+          value = google_storage_bucket.transactions.name
         }
         env {
           name  = "SECRET_ID"

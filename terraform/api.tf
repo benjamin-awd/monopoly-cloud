@@ -54,3 +54,10 @@ resource "google_project_service" "cloudresourcemanager" {
   disable_dependent_services = false
   disable_on_destroy         = false
 }
+
+resource "google_project_service" "kms" {
+  service = "cloudkms.googleapis.com"
+
+  disable_dependent_services = false
+  disable_on_destroy         = false
+}
