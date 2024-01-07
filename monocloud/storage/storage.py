@@ -25,7 +25,7 @@ def upload_to_cloud_storage(
     )
     blob = bucket.blob(blob_name)
 
-    logger.info(f"Attempting to upload to 'gs://{bucket_name}/{blob_name}'")
+    logger.debug(f"Attempting to upload to 'gs://{bucket_name}/{blob_name}'")
     blob.upload_from_filename(source_filename)
     logger.info("Uploaded to %s", blob_name)
 
