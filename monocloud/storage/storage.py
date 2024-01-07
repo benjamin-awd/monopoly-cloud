@@ -1,12 +1,44 @@
 import logging
+from datetime import datetime
 from pathlib import Path
 
 from google.cloud import storage  # type: ignore
+from monopoly.config import StatementConfig
 from monopoly.statements import CreditStatement, DebitStatement
-from monopoly.write import generate_name
+from monopoly.write import generate_hash, generate_name
 from pandas import DataFrame
 
 logger = logging.getLogger(__name__)
+
+
+def generate_blob_name(
+    file_path: Path,
+    statement_config: StatementConfig,
+    statement_type: str,
+    statement_date: datetime,
+    file_suffix="csv",
+) -> str:
+    """
+    Generates a blob name for Google Cloud Storage
+
+    Partitions by bank name, account type, year month and statement UUID
+    """
+    bank_name = statement_config.bank_name
+    year = statement_date.year
+    month = statement_date.month
+    file_uuid = generate_hash(file_path)
+
+    filename = (
+        f"{bank_name}-{statement_type}-{year}-{month:02d}-{file_uuid}.{file_suffix}"
+    )
+
+    blob_name = (
+        f"bank_name={bank_name}/"
+        f"account_type={statement_type}/"
+        f"statement_date={statement_date.isoformat()[:10]}/"
+        f"{filename}"
+    )
+    return blob_name
 
 
 def upload_to_cloud_storage(
@@ -16,9 +48,8 @@ def upload_to_cloud_storage(
 ) -> None:
     client = storage.Client()
     bucket = client.get_bucket(bucket_name)
-    blob_name = generate_name(
+    blob_name = generate_blob_name(
         file_path=source_filename,
-        format_type="blob",
         statement_config=statement.statement_config,
         statement_type=statement.statement_type,
         statement_date=statement.statement_date,
