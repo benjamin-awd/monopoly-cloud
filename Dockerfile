@@ -13,15 +13,15 @@ COPY pyproject.toml poetry.lock ./
 
 FROM base AS builder
 
-RUN apt-get update \
-  && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update&& apt-get -y install build-essential libpoppler-cpp-dev pkg-config
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
 FROM base AS test
 
-RUN apt-get update \
-  && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update&& apt-get -y install build-essential libpoppler-cpp-dev pkg-config
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --no-root
 
