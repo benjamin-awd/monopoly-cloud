@@ -42,14 +42,14 @@ def generate_blob_name(
 
 
 def upload_to_cloud_storage(
-    source_filename: str,
+    file_path: Path,
     bucket_name: str,
     statement: CreditStatement | DebitStatement,
 ) -> None:
     client = storage.Client()
     bucket = client.get_bucket(bucket_name)
     blob_name = generate_blob_name(
-        file_path=source_filename,
+        file_path=file_path,
         statement_config=statement.statement_config,
         statement_type=statement.statement_type,
         statement_date=statement.statement_date,
@@ -57,7 +57,7 @@ def upload_to_cloud_storage(
     blob = bucket.blob(blob_name)
 
     logger.debug(f"Attempting to upload to 'gs://{bucket_name}/{blob_name}'")
-    blob.upload_from_filename(source_filename)
+    blob.upload_from_filename(file_path)
     logger.info("Uploaded to %s", blob_name)
 
 

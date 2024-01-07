@@ -874,13 +874,13 @@ files = [
 
 [[package]]
 name = "monopoly-sg"
-version = "0.6.4"
+version = "0.6.5"
 description = "PDF parsing for Singaporean banks"
 optional = false
 python-versions = ">=3.11,<3.12"
 files = [
-    {file = "monopoly_sg-0.6.4-py3-none-any.whl", hash = "sha256:fc0b0b40b9719e2548ed578cb722b6af98b48eadf943dd51d5aa84dbae8d6446"},
-    {file = "monopoly_sg-0.6.4.tar.gz", hash = "sha256:d02cf7d21c52a52a537c1ce11bc03cce67a08a3e9a18a99afd26927cc168cff3"},
+    {file = "monopoly_sg-0.6.5-py3-none-any.whl", hash = "sha256:ca32e4f0fdecd657451dc53ad01799dd9d402822bc207a256f23728a11e457ad"},
+    {file = "monopoly_sg-0.6.5.tar.gz", hash = "sha256:4231bb3fa796fb540223b079d1cb597d77dcd7c812db75089e639228c45ccbbd"},
 ]
 
 [package.dependencies]
@@ -2128,4 +2128,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.11,<3.12"
-content-hash = "0cb1f18ebb4d0fec5f17e2ec32c5318485593ada0c843a02be748df146046fe2"
+content-hash = "912322911caa5f884bb8ca16a8bc80d688bf73228137ee45fa421dfb85a50fc5"
