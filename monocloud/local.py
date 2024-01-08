@@ -19,7 +19,7 @@ def process_and_upload(file_path):
 
 def upload_from_local():
     """Helper function to upload files to cloud storage from local"""
-    statements = glob("statements/**/*.pdf", recursive=True)
+    statements = glob("statements/input.pdf", recursive=True)
 
     with ThreadPoolExecutor() as executor:
         executor.map(process_and_upload, statements)

@@ -8,5 +8,10 @@ data "google_secret_manager_secret_version" "dbs" {
   project = var.project_id
 }
 
+data "google_secret_manager_secret_version" "monopoly_passwords" {
+  secret  = "monopoly-passwords"
+  project = var.project_id
+}
+
 data "google_project" "project" {
 }

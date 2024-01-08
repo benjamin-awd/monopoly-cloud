@@ -25,6 +25,16 @@ resource "google_secret_manager_secret_iam_binding" "default" {
   ]
 }
 
+resource "google_secret_manager_secret_iam_binding" "monopoly_passwords" {
+  secret_id = data.google_secret_manager_secret_version.monopoly_passwords.secret
+  project   = data.google_secret_manager_secret_version.monopoly_passwords.project
+  role      = "roles/secretmanager.secretAccessor"
+
+  members = [
+    "serviceAccount:${google_service_account.default.email}"
+  ]
+}
+
 resource "google_storage_bucket_iam_member" "storage" {
   bucket = google_storage_bucket.transactions.name
   role   = "roles/storage.admin"
@@ -40,8 +50,24 @@ resource "google_cloud_run_v2_job" "default" {
       service_account = google_service_account.default.email
       max_retries     = 1
 
+      volumes {
+        name   = "monopoly"
+        secret {
+          secret = data.google_secret_manager_secret_version.monopoly_passwords.secret
+          items  {
+            version = "latest"
+            path    = "monopoly.json"
+            mode    = 0
+          }
+        }
+      }
+
       containers {
         image = "${local.container_uri_prefix}/monopoly/monopoly:main"
+      volume_mounts {
+          name = "monopoly"
+          mount_path = "/run/secrets"
+        }
 
         env {
           name  = "PUBSUB_TOPIC"
@@ -66,14 +92,6 @@ resource "google_cloud_run_v2_job" "default" {
         env {
           name  = "TRUSTED_USER_EMAILS"
           value = jsonencode(var.trusted_emails)
-        }
-        env {
-          name  = "OCBC_PDF_PASSWORDS"
-          value = jsonencode(var.ocbc_passwords)
-        }
-        env {
-          name  = "HSBC_PDF_PASSWORDS"
-          value = jsonencode(var.hsbc_passwords)
         }
       }
     }
