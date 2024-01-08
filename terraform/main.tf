@@ -25,6 +25,16 @@ resource "google_secret_manager_secret_iam_binding" "default" {
   ]
 }
 
+resource "google_secret_manager_secret_iam_binding" "pdf_passwords" {
+  secret_id = data.google_secret_manager_secret_version.monopoly_passwords.secret
+  project   = data.google_secret_manager_secret_version.monopoly_passwords.project
+  role      = "roles/secretmanager.secretAccessor"
+
+  members = [
+    "serviceAccount:${google_service_account.default.email}"
+  ]
+}
+
 resource "google_storage_bucket_iam_member" "storage" {
   bucket = google_storage_bucket.transactions.name
   role   = "roles/storage.admin"
@@ -68,12 +78,13 @@ resource "google_cloud_run_v2_job" "default" {
           value = jsonencode(var.trusted_emails)
         }
         env {
-          name  = "OCBC_PDF_PASSWORDS"
-          value = jsonencode(var.ocbc_passwords)
-        }
-        env {
-          name  = "HSBC_PDF_PASSWORDS"
-          value = jsonencode(var.hsbc_passwords)
+          name  = "PASSWORDS"
+          value_source {
+            secret_key_ref {
+              secret = data.google_secret_manager_secret_version.monopoly_passwords.secret
+              version = "latest"
+            }
+          }
         }
       }
     }
