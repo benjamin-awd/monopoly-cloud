@@ -15,18 +15,9 @@ def test_message_with_parts(message: Message):
         }
     }
     message.payload = data["payload"]
-    parts = message.parts
-
-    assert len(parts) == 2
-
-    part1, part2 = parts
-    assert part1.part_id == "1"
-    assert part1.filename == "file1.txt"
-    assert part1.attachment_id == "123"
-
-    assert part2.part_id == "2"
-    assert part2.filename is None
-    assert part2.attachment_id == "456"
+    attachment_id, filename = message.get_attachment_metadata()
+    assert filename == "file1.txt"
+    assert attachment_id == "123"
 
 
 def test_message_with_nested_parts(message: Message):
@@ -53,19 +44,14 @@ def test_message_with_nested_parts(message: Message):
         }
     }
     message.payload = data["payload"]
-    parts = message.parts
+    attachment_id, filename = message.get_attachment_metadata()
+    assert filename == "file1.txt"
+    assert attachment_id == "123"
 
-    assert len(parts) == 3
 
-    part1, part2, nested_part = parts
-    assert part1.part_id == "1"
-    assert part1.filename == "file1.txt"
-    assert part1.attachment_id == "123"
-
-    assert part2.part_id == "2"
-    assert part2.filename is None
-    assert part2.attachment_id == "456"
-
-    assert nested_part.part_id == "3"
-    assert nested_part.filename == "file2.txt"
-    assert nested_part.attachment_id == "789"
+def test_message_with_no_parts(message: Message):
+    data = {"payload": {"filename": "file1.txt", "body": {"attachmentId": "123"}}}
+    message.payload = data["payload"]
+    attachment_id, filename = message.get_attachment_metadata()
+    assert filename == "file1.txt"
+    assert attachment_id == "123"

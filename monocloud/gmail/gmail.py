@@ -11,11 +11,7 @@ from typing import TYPE_CHECKING, Generator, Optional
 
 from monocloud.config import cloud_settings
 from monocloud.gmail.credentials import get_gmail_service
-from monocloud.gmail.exceptions import (
-    AttachmentNotFoundError,
-    MultipleAttachmentsError,
-    UntrustedUserError,
-)
+from monocloud.gmail.exceptions import UntrustedUserError
 
 if TYPE_CHECKING:
     from googleapiclient._apis.gmail.v1.resources import GmailResource
@@ -76,21 +72,35 @@ class Message(Gmail):
     def __init__(self, data: dict, gmail_service: GmailResource):
         self.message_id: str = data.get("id")  # type: ignore
         self.payload: dict = data.get("payload")  # type: ignore
+        self._data: dict = data
         self.gmail_service = gmail_service
         self.trusted_user_emails = cloud_settings.trusted_user_emails
         super().__init__(gmail_service)
 
+    def get_attachment_metadata(self) -> tuple(str):
+        if self.parts:
+            for part in self.parts:
+                attachment_id = self.search_for_key(part, "attachmentId")
+                filename = self.search_for_key(part, "filename")
+                if attachment_id and filename:
+                    break
+
+        if not self.parts:
+            attachment_id = self.payload["body"]["attachmentId"]
+            filename = self.payload["filename"]
+        return attachment_id, filename
+
     def get_attachment(self):
-        attachment_part = self._get_attachment_part()
-        logger.info("Extracting attachment '%s'", attachment_part.filename)
+        attachment_id, filename = self.get_attachment_metadata()
+        logger.info("Extracting attachment '%s'", filename)
 
         if not self.from_trusted_user:
             raise UntrustedUserError("Not from trusted user")
 
         file_byte_string = self.get_attachment_byte_string(
-            self.message_id, attachment_part.attachment_id
+            self.message_id, attachment_id
         )
-        return MessageAttachment(attachment_part.filename, file_byte_string)
+        return MessageAttachment(filename, file_byte_string)
 
     @staticmethod  # type: ignore
     @contextlib.contextmanager
@@ -131,18 +141,22 @@ class Message(Gmail):
             .execute()
         )
 
-    def _get_attachment_part(self) -> MessagePart:
-        if not self.parts:
-            raise AttachmentNotFoundError
-
-        attachments = [part for part in self.parts if part.filename]
-        if not attachments:
-            raise AttachmentNotFoundError
-
-        if len(attachments) > 1:
-            raise MultipleAttachmentsError
-
-        return attachments[0]
+    def search_for_key(self, part: dict, specific_key: str):
+        """Recursively searches message part for a specific key"""
+        for key, value in part.items():
+            if key == specific_key:
+                return value
+            if isinstance(value, dict):
+                result = self.search_for_key(value, specific_key)
+                if result:
+                    return result
+            if isinstance(value, list):
+                for item in value:
+                    if isinstance(item, dict):
+                        result = self.search_for_key(item, specific_key)
+                        if result:
+                            return result
+        return None
 
     @property
     def subject(self) -> str:
@@ -152,7 +166,7 @@ class Message(Gmail):
         raise RuntimeError("Subject could not be found")
 
     @property
-    def parts(self) -> list[MessagePart] | None:
+    def parts(self) -> list[dict] | None:
         """Return parts and nested parts"""
         if parts := self.payload.get("parts"):
             nested_parts = [
@@ -161,7 +175,7 @@ class Message(Gmail):
                 if part.get("parts")
                 for nested_part in part.get("parts")
             ]
-            return [MessagePart(part) for part in parts + nested_parts]
+            return list(parts + nested_parts)
 
         return None
 
@@ -171,27 +185,11 @@ class Message(Gmail):
         for item in self.payload["headers"]:
             if item["name"] == "From":
                 for trusted_email in self.trusted_user_emails:
-                    if f"<{trusted_email}>" in item["value"]:
+                    if trusted_email in item["value"]:
                         return True
 
         logger.info("No trusted user found")
         return False
-
-
-@dataclass
-class MessagePart:
-    def __init__(self, data: dict):
-        self._data = data
-        self.part_id: str | None = data.get("partId")
-        self.filename: str | None = data.get("filename")
-        self.body: dict | None = data.get("body")
-
-    @property
-    def attachment_id(self):
-        return self.body.get("attachmentId")
-
-    def __repr__(self):
-        return str(self._data)
 
 
 @dataclass

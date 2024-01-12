@@ -10,7 +10,7 @@ class CloudSettings(BaseSettings):
 
     project_id: str = ""
     secret_id: str = ""
-    trusted_user_emails: list = []
+    trusted_user_emails: list[str] = []
     gmail_address: str = ""
     pubsub_topic: str = ""
     gcs_bucket: str = ""

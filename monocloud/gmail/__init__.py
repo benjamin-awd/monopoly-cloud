@@ -1,3 +1,3 @@
-from .gmail import Gmail, Message, MessageAttachment, MessagePart
+from .gmail import Gmail, Message, MessageAttachment
 
-__all__ = ["Gmail", "Message", "MessageAttachment", "MessagePart"]
+__all__ = ["Gmail", "Message", "MessageAttachment"]
