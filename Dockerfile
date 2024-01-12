@@ -14,7 +14,7 @@ COPY pyproject.toml poetry.lock ./
 FROM base AS builder
 
 RUN --mount=type=cache,target=/var/cache/apt \
-    apt-get update&& apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+    apt-get update && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
 
 RUN --mount=type=cache,target=$POETRY_CACHE_DIR poetry install --without dev --no-root
 
@@ -39,8 +39,9 @@ ENV VIRTUAL_ENV=/app/.venv \
 
 COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-RUN apt-get update \
-  && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+RUN --mount=type=cache,target=/var/cache/apt \
+    apt-get update && apt-get -y install build-essential libpoppler-cpp-dev pkg-config
+
 COPY monocloud ./monocloud
 
 CMD ["python", "-m", "monocloud.main"]
