@@ -11,7 +11,11 @@ from typing import TYPE_CHECKING, Generator, Optional
 
 from monocloud.config import cloud_settings
 from monocloud.gmail.credentials import get_gmail_service
-from monocloud.gmail.exceptions import UntrustedUserError
+from monocloud.gmail.exceptions import (
+    AttachmentNotFoundError,
+    MultipleAttachmentsError,
+    UntrustedUserError,
+)
 
 if TYPE_CHECKING:
     from googleapiclient._apis.gmail.v1.resources import GmailResource
@@ -77,18 +81,38 @@ class Message(Gmail):
         self.trusted_user_emails = cloud_settings.trusted_user_emails
         super().__init__(gmail_service)
 
-    def get_attachment_metadata(self) -> tuple(str):
-        if self.parts:
-            for part in self.parts:
-                attachment_id = self.search_for_key(part, "attachmentId")
-                filename = self.search_for_key(part, "filename")
-                if attachment_id and filename:
-                    break
+    def get_attachment_metadata(self) -> tuple[str, str]:
+        payload = self.payload
+        attachment_id = self.find_nested_values(payload, "attachmentId")
+        filename = self.find_nested_values(payload, "filename")
 
-        if not self.parts:
-            attachment_id = self.payload["body"]["attachmentId"]
-            filename = self.payload["filename"]
-        return attachment_id, filename
+        if len(attachment_id) > 1 or len(filename) > 1:
+            raise MultipleAttachmentsError
+
+        if not attachment_id or not filename:
+            raise AttachmentNotFoundError
+
+        return attachment_id[0], filename[0]
+
+    @staticmethod
+    def find_nested_values(data, key: str) -> str:
+        values = []
+
+        # pylint: disable = invalid-name
+        def recursive_search(obj):
+            if isinstance(obj, dict):
+                for k, v in obj.items():
+                    # only append non-null values
+                    if v and k == key:
+                        values.append(v)
+                    elif isinstance(v, (dict, list)):
+                        recursive_search(v)
+            elif isinstance(obj, list):
+                for item in obj:
+                    recursive_search(item)
+
+        recursive_search(data)
+        return values
 
     def get_attachment(self):
         attachment_id, filename = self.get_attachment_metadata()
@@ -141,43 +165,12 @@ class Message(Gmail):
             .execute()
         )
 
-    def search_for_key(self, part: dict, specific_key: str):
-        """Recursively searches message part for a specific key"""
-        for key, value in part.items():
-            if key == specific_key:
-                return value
-            if isinstance(value, dict):
-                result = self.search_for_key(value, specific_key)
-                if result:
-                    return result
-            if isinstance(value, list):
-                for item in value:
-                    if isinstance(item, dict):
-                        result = self.search_for_key(item, specific_key)
-                        if result:
-                            return result
-        return None
-
     @property
     def subject(self) -> str:
         for item in self.payload["headers"]:
             if item["name"] == "Subject":
                 return item["value"]
         raise RuntimeError("Subject could not be found")
-
-    @property
-    def parts(self) -> list[dict] | None:
-        """Return parts and nested parts"""
-        if parts := self.payload.get("parts"):
-            nested_parts = [
-                nested_part
-                for part in list(parts)
-                if part.get("parts")
-                for nested_part in part.get("parts")
-            ]
-            return list(parts + nested_parts)
-
-        return None
 
     @property
     def from_trusted_user(self) -> bool:
