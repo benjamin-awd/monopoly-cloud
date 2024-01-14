@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_credentials(version_id="latest"):
-    project_id = cloud_settings.project_id
+    project_id = cloud_settings.google_cloud_project
     secret_id = cloud_settings.secret_id
     scopes = [
         "https://www.googleapis.com/auth/gmail.readonly",

@@ -22,7 +22,7 @@ variable "trusted_emails" {
   sensitive   = true
 }
 
-variable "project_id" {
+variable "google_cloud_project" {
   description = "Google project ID"
   type        = string
 }

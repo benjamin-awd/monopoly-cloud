@@ -17,7 +17,7 @@ def set_up_gmail_push_notifications():
     request_body = {
         "labelIds": ["INBOX"],
         "topicName": (
-            f"projects/{cloud_settings.project_id}/"
+            f"projects/{cloud_settings.google_cloud_project}/"
             f"topics/{cloud_settings.pubsub_topic}"
         ),
     }

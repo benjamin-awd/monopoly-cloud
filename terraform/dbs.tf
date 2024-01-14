@@ -30,7 +30,7 @@ resource "google_cloud_run_v2_job" "dbs" {
             memory = "1024Mi"
           }
         }
-  
+
         image = "${local.container_uri_prefix}/dbs/dbs:main"
 
         args = ["--email", "--upload", "--page-size=1"]
@@ -41,7 +41,7 @@ resource "google_cloud_run_v2_job" "dbs" {
         }
         env {
           name  = "PROJECT_ID"
-          value = var.project_id
+          value = var.google_cloud_project
         }
         env {
           name  = "SECRET_ID"

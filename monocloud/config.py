@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 class CloudSettings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="allow")
 
-    project_id: str = ""
+    google_cloud_project: str = ""
     secret_id: str = ""
     trusted_user_emails: list[str] = []
     gmail_address: str = ""

@@ -63,7 +63,7 @@ resource "google_cloud_run_v2_job" "default" {
         }
         env {
           name  = "PROJECT_ID"
-          value = var.project_id
+          value = var.google_cloud_project
         }
         env {
           name  = "GCS_BUCKET"
@@ -107,7 +107,7 @@ resource "google_cloud_scheduler_job" "default" {
 }
 
 resource "google_project_iam_binding" "cloud_run_invoker" {
-  project = var.project_id
+  project = var.google_cloud_project
   role    = "roles/run.invoker"
 
   members = [
