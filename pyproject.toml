@@ -7,19 +7,19 @@ authors = ["benjamin-awd <benjamindornel@gmail.com>"]
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
 monopoly-sg = "^0.6.6"
-google-api-python-client = "^2.113.0"
+google-api-python-client = "^2.116.0"
 google-auth-oauthlib = "^1.0.0"
-google-auth = "^2.26.2"
+google-auth = "^2.27.0"
 google-cloud-storage = "^2.10.0"
 google-cloud-secret-manager = "^2.16.3"
 
 [tool.poetry.group.dev.dependencies]
-black = "^23.7.0"
+black = "^24.1.1"
 pylint = "^3.0.3"
 isort = "^5.12.0"
 taskipy = "^1.12.0"
 flake8 = "^7.0.0"
-pytest = "^7.4.1"
+pytest = "^8.0.0"
 pytest-xdist = "^3.3.1"
 pysnooper = "^1.2.0"
 google-api-python-client-stubs = "^1.17.0"
