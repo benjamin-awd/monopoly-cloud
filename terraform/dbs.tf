@@ -75,7 +75,7 @@ resource "google_cloud_run_v2_job" "dbs" {
 resource "google_cloud_scheduler_job" "dbs" {
   name        = "monthly-dbs-bank-statement-extraction"
   description = "Extracts bank statements from dbs"
-  schedule    = "0 0 1 * *"  # 00:00 UTC (8AM SGT) on first day of each month
+  schedule    = "0 0 15 * *"  # 00:00 UTC (8AM SGT) on 15th day of each month
   time_zone   = "UTC"
 
   http_target {
