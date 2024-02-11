@@ -62,7 +62,7 @@ resource "google_cloud_run_v2_job" "default" {
           value = var.gmail_address
         }
         env {
-          name  = "PROJECT_ID"
+          name  = "GOOGLE_CLOUD_PROJECT"
           value = var.google_cloud_project
         }
         env {
