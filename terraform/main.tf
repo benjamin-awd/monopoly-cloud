@@ -94,7 +94,7 @@ resource "google_cloud_run_v2_job" "default" {
 resource "google_cloud_scheduler_job" "default" {
   name        = "daily-bank-statement-extraction"
   description = "Extracts bank statements"
-  schedule    = "0 0 * * *"
+  schedule    = "0 * * * *"
   time_zone   = "UTC"
 
   http_target {
