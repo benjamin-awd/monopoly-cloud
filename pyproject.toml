@@ -6,25 +6,25 @@ authors = ["benjamin-awd <benjamindornel@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-monopoly-sg = "^0.7.2"
-google-api-python-client = "^2.120.0"
+monopoly-sg = "^0.7.8"
+google-api-python-client = "^2.127.0"
 google-auth-oauthlib = "^1.0.0"
-google-auth = "^2.28.1"
-google-cloud-storage = "^2.10.0"
-google-cloud-secret-manager = "^2.18.2"
+google-auth = "^2.29.0"
+google-cloud-storage = "^2.16.0"
+google-cloud-secret-manager = "^2.20.0"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.2.0"
+black = "^24.4.2"
 pylint = "^3.1.0"
 isort = "^5.12.0"
 taskipy = "^1.12.0"
 flake8 = "^7.0.0"
-pytest = "^8.0.2"
-pytest-xdist = "^3.3.1"
+pytest = "^8.2.0"
+pytest-xdist = "^3.6.1"
 pysnooper = "^1.2.0"
-google-api-python-client-stubs = "^1.24.0"
+google-api-python-client-stubs = "^1.25.0"
 pylint-pydantic = "^0.3.0"
-mypy = "^1.6.1"
+mypy = "^1.10.0"
 
 
 [tool.taskipy.tasks]
