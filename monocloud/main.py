@@ -50,10 +50,7 @@ def process_bank_statement(message: Message, upload_to_cloud: bool = True):
 
         if upload_to_cloud:
             processed_file_path = load(
-                df=transformed_df,
-                statement=statement,
-                output_directory=Path("."),
-                file_path=file_path,
+                df=transformed_df, statement=statement, output_directory=Path(".")
             )
 
             try:
