@@ -1,4 +1,5 @@
 """Test for entrypoint used by Cloud Run"""
+
 from unittest.mock import Mock, PropertyMock, patch
 
 from monocloud.main import process_bank_statement

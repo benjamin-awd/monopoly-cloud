@@ -1,4 +1,5 @@
 """Helper file used to generate access token for gmail service account"""
+
 from __future__ import print_function
 
 import os.path

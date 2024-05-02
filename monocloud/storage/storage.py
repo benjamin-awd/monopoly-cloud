@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
+from fitz import Document
 from google.cloud import storage  # type: ignore
 from monopoly.config import StatementConfig
 from monopoly.statements import CreditStatement, DebitStatement
@@ -12,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def generate_blob_name(
-    file_path: Path,
+    document: Document,
     statement_config: StatementConfig,
     statement_type: str,
     statement_date: datetime,
@@ -26,7 +27,7 @@ def generate_blob_name(
     bank_name = statement_config.bank_name
     year = statement_date.year
     month = statement_date.month
-    file_uuid = generate_hash(file_path)
+    file_uuid = generate_hash(document)
 
     filename = (
         f"{bank_name}-{statement_type}-{year}-{month:02d}-{file_uuid}.{file_suffix}"
@@ -49,7 +50,7 @@ def upload_to_cloud_storage(
     client = storage.Client()
     bucket = client.get_bucket(bucket_name)
     blob_name = generate_blob_name(
-        file_path=file_path,
+        document=statement.document,
         statement_config=statement.statement_config,
         statement_type=statement.statement_type,
         statement_date=statement.statement_date,
@@ -62,16 +63,13 @@ def upload_to_cloud_storage(
 
 
 def load(
-    df: DataFrame,
-    statement: CreditStatement | DebitStatement,
-    output_directory: Path,
-    file_path: Path,
+    df: DataFrame, statement: CreditStatement | DebitStatement, output_directory: Path
 ):
     if isinstance(output_directory, str):
         output_directory = Path(output_directory)
 
     filename = generate_name(
-        file_path=file_path,
+        document=statement.document,
         format_type="file",
         statement_config=statement.statement_config,
         statement_type=statement.statement_type,
