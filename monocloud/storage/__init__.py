@@ -1,3 +1,3 @@
-from .storage import load, upload_to_cloud_storage
+from .storage import upload_to_cloud_storage
 
-__all__ = ["upload_to_cloud_storage", "load"]
+__all__ = ["upload_to_cloud_storage"]

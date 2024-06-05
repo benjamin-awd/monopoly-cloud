@@ -15,11 +15,4 @@ _ignore*
 *.txt
 
 # allowed pdf files/fixtures
-!tests/integration/banks/**/*.csv
-!tests/integration/banks/**/*.pdf
-!monopoly/examples/*.pdf
-
-# john files
-john.log
-.hash
-.pot
+!tests/example_statement.pdf
