@@ -24,7 +24,7 @@ def main():
 
     for message in messages:
         try:
-            process_bank_statement(message)
+            process_bank_statement(message, upload_to_cloud=True)
         except AttachmentNotFoundError as err:
             logger.error(err, exc_info=True)
             message.mark_as_spam()
@@ -36,7 +36,26 @@ def main():
         sys.exit(1)
 
 
-def process_bank_statement(message: Message, upload_to_cloud: bool = True):
+def run_pipeline(file_path, upload_to_cloud: bool, output_dir: Path = Path(".")):
+    """
+    Runs the pipeline on a file, and returns the path to the
+    processed CSV
+    """
+    pipeline = Pipeline(file_path)
+    statement = pipeline.extract()
+    transactions = pipeline.transform(statement)
+    processed_file_path = pipeline.load(
+        transactions=transactions, statement=statement, output_directory=output_dir
+    )
+    logger.info("Created file: %s", processed_file_path)
+    if upload_to_cloud:
+        upload_to_cloud_storage(
+            processed_file_path, cloud_settings.gcs_bucket, statement
+        )
+    return processed_file_path
+
+
+def process_bank_statement(message: Message, upload_to_cloud: bool):
     """
     Process a bank statement using the provided bank class.
 
@@ -44,22 +63,12 @@ def process_bank_statement(message: Message, upload_to_cloud: bool = True):
     """
     attachment = message.get_attachment()
     with message.save(attachment) as file_path:  # type: ignore
-        pipeline = Pipeline(file_path)
-        statement = pipeline.extract()
-        transactions = pipeline.transform(statement)
-        processed_file_path = pipeline.load(
-            transactions=transactions, statement=statement, output_directory=Path(".")
-        )
-
-        if upload_to_cloud:
-            try:
-                upload_to_cloud_storage(
-                    processed_file_path, cloud_settings.gcs_bucket, statement
-                )
-                message.mark_as_read()
-            except Exception as err:
-                logger.error(err, exc_info=True)
-        return processed_file_path
+        try:
+            file_path = run_pipeline(file_path, upload_to_cloud)
+            message.mark_as_read()
+        except Exception as err:
+            logger.error(err, exc_info=True)
+    return file_path
 
 
 if __name__ == "__main__":
