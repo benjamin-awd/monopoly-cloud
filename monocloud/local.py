@@ -23,7 +23,7 @@ def upload_from_local(upload_to_cloud: bool, single_process: bool, output_dir: P
         process_func = partial(
             run_pipeline, upload_to_cloud=upload_to_cloud, output_dir=output_dir
         )
-        with ThreadPoolExecutor() as executor:
+        with ThreadPoolExecutor(max_workers=6) as executor:
             executor.map(process_func, statements)
 
 
@@ -39,7 +39,6 @@ if __name__ == "__main__":
         "--single",
         action="store_true",
         help="Run in single-threaded mode",
-        default=True,
     )
     parser.add_argument(
         "--output", help="Controls output directory", default="./output"
