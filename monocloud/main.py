@@ -3,12 +3,12 @@ import logging
 import sys
 from pathlib import Path
 
-from monopoly.processors import detect_processor
+from monopoly.pipeline import Pipeline
 
 from monocloud.config import cloud_settings
 from monocloud.gmail import Gmail, Message
 from monocloud.gmail.exceptions import AttachmentNotFoundError
-from monocloud.storage import load, upload_to_cloud_storage
+from monocloud.storage import upload_to_cloud_storage
 
 logger = logging.getLogger(__name__)
 
@@ -44,15 +44,14 @@ def process_bank_statement(message: Message, upload_to_cloud: bool = True):
     """
     attachment = message.get_attachment()
     with message.save(attachment) as file_path:  # type: ignore
-        processor = detect_processor(file_path=file_path)
-        statement = processor.extract()
-        transformed_df = processor.transform(statement)
+        pipeline = Pipeline(file_path)
+        statement = pipeline.extract()
+        transactions = pipeline.transform(statement)
+        processed_file_path = pipeline.load(
+            transactions=transactions, statement=statement, output_directory=Path(".")
+        )
 
         if upload_to_cloud:
-            processed_file_path = load(
-                df=transformed_df, statement=statement, output_directory=Path(".")
-            )
-
             try:
                 upload_to_cloud_storage(
                     processed_file_path, cloud_settings.gcs_bucket, statement
@@ -60,6 +59,7 @@ def process_bank_statement(message: Message, upload_to_cloud: bool = True):
                 message.mark_as_read()
             except Exception as err:
                 logger.error(err, exc_info=True)
+        return processed_file_path
 
 
 if __name__ == "__main__":

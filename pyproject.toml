@@ -6,12 +6,12 @@ authors = ["benjamin-awd <benjamindornel@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = ">=3.11,<3.12"
-monopoly-sg = "^0.7.8"
 google-api-python-client = "^2.127.0"
 google-auth-oauthlib = "^1.0.0"
 google-auth = "^2.29.0"
 google-cloud-storage = "^2.16.0"
 google-cloud-secret-manager = "^2.20.0"
+monopoly-core = "^0.9.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.4.2"
